@@ -21,7 +21,7 @@ import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CreditCardIcon from '@mui/icons-material/CreditCard';
-
+import axios from "axios"
 
 export default function Home() {
 
@@ -29,6 +29,7 @@ export default function Home() {
         firstName : "",
         lastName : "",
         password : "",
+        confirm : "",
         email :""
     })
 
@@ -46,7 +47,7 @@ async function handleSubmit (e) {
      try {
 
    
-     const response = await fetch ("http://localhost:5000/signup",{
+     const response = await axios.post ("http://localhost:5000/signup",{
        method:"post",
        headers:{
         "Content-type": "application/json"
@@ -55,7 +56,8 @@ async function handleSubmit (e) {
     
      })
      const data = await response.json();
-     console.log("the server response");
+      console.log("Server Response:", data);
+
      
     }
     catch (err) {
@@ -64,22 +66,33 @@ async function handleSubmit (e) {
 }
   return (
     <>
-    
+     <Typography  variant="h2" color="navy" gutterBottom  align="center">
+          Welcome to Trip Booking Hub ✈️
+        </Typography>
+
     <Box
+    
         sx={{
-          backgroundImage: "url('/bus.webp')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundImage: "url('/login.jpg')",
+          backgroundSize: "50%",
+          backgroundPosition: "left",
+          backgroundRepeat: "no-repeat",
           minHeight: "100vh",
           display: "flex",
+          backgroundColor:"white",
           justifyContent: "flex-end",
           alignItems: "center",
           p: 4,
           pr: 20,
         }}
+        
+        
       >
+        
+       
         <CssBaseline />
         <Box
+        
         sx={{
             backgroundColor : "white",
             
@@ -87,93 +100,111 @@ async function handleSubmit (e) {
         
         >
         
-        <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign up
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="firstName"
-                  label="First Name"
-                  fullWidth
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  name="lastName"
-                  label="Last Name"
-                  fullWidth
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  name="email"
-                  label="Email Address"
-                  fullWidth
-                  required
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  name="password"
-                  label="Password"
-                  fullWidth
-                  required
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="agreeToEmails"
-                      color="primary"
-                      checked={formData.agreeToEmails}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="I want to receive inspiration, marketing promotions and updates via email."
-                />
-              </Grid>
-            </Grid>
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
-              Sign Up
-            </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="/Login" variant="body2">
-                  Already have an account? Log in
-                </Link>
-              </Grid>
-            </Grid>
-          </Box>
-        </Box>
-      </Container>
+  <Container component="main" maxWidth="xs">
+  <CssBaseline />
+  <Box
+    sx={{
+      marginTop: 8,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}
+  >
+    <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+      <LockOutlinedIcon />
+    </Avatar>
+    <Typography component="h1" variant="h5">
+      Sign up
+    </Typography>
+
+    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
+    
+      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+        <TextField
+          name="firstName"
+          label="First Name"
+          required
+          fullWidth
+          value={formData.firstName}
+          onChange={handleChange}
+        />
+        <TextField
+          name="lastName"
+          label="Last Name"
+          required
+          fullWidth
+          value={formData.lastName}
+          onChange={handleChange}
+        />
+      </Box>
+
+      {/* Email */}
+      <TextField
+        name="email"
+        label="Email Address"
+        required
+        fullWidth
+        type="email"
+        margin="normal"
+        value={formData.email}
+        onChange={handleChange}
+      />
+
+      {/* Password */}
+      <TextField
+        name="password"
+        label="Password"
+        required
+        fullWidth
+        type="password"
+        margin="normal"
+        value={formData.password}
+        onChange={handleChange}
+      />
+
+      {/* Confirm Password */}
+      <TextField
+        name="confirm"
+        label="Confirm Password"
+        required
+        fullWidth
+        type="password"
+        margin="normal"
+        value={formData.confirm}
+        onChange={handleChange}
+      />
+
+      {/* Checkbox */}
+      <FormControlLabel
+        sx={{ mt: 1 }}
+        control={
+          <Checkbox
+            name="agreeToEmails"
+            color="primary"
+            checked={formData.agreeToEmails}
+            onChange={handleChange}
+          />
+        }
+        label="I want to receive inspiration, marketing promotions and updates via email."
+      />
+
+      {/* Submit Button */}
+      <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+        Sign Up
+      </Button>
+
+      {/* Login Link */}
+      <Grid container justifyContent="flex-end">
+        <Grid item>
+          <Link href="/Login" variant="body2">
+            Already have an account? Log in
+          </Link>
+        </Grid>
+      </Grid>
+    </Box>
+  </Box>
+</Container>
+
         
       </Box>
       </Box>
@@ -221,7 +252,7 @@ async function handleSubmit (e) {
                         >
                             <EventAvailableIcon style={{ fontSize: 50, color: "blue" }} />
                             <Typography variant="h6">Book</Typography>
-                            <Typography>Booking tickets is easier than ever.</Typography>
+                            <Typography>Booking tickets  easier than ever.</Typography>
                         </Card>
                     </Grid>
                     <Grid item xs={12} sm={4}>

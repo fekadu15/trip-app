@@ -31,9 +31,9 @@ app.get("/", (req, res) => {
 
 // ======= SIGNUP =======
 app.post("/signup", async (req, res) => {
-  const { password, confirm, first_name, last_name, email } = req.body;
+  const { Password, Confirm, firstName, lastName, email } = req.body;
 
-  if (!email || !email.includes("@") || !first_name?.trim() || password.length < 6) {
+  if (!email || !email.includes("@") || !firstName?.trim()  || !lastName?.trim() || Password.length < 6) {
     return res.status(400).json({ message: "Invalid email, name, or password" });
   }
 
@@ -47,7 +47,7 @@ app.post("/signup", async (req, res) => {
       `INSERT INTO users (f_name, l_name, email, password) 
        VALUES ($1, $2, $3, $4)
        RETURNING id, f_name, l_name, email, role`,
-      [first_name, last_name, email, hashed_password]
+      [firstName, lastName, email, hashed_password]
     );
 
     res.status(201).json({
@@ -80,7 +80,7 @@ app.post("/login", async (req, res) => {
     const token = jwt.sign(
   { id: user.id, email: user.email, role: user.role },
   process.env.JWT_SECRET,
-  { expiresIn: "1h" }
+  { expiresIn: "78h" }
 );
 
 
@@ -96,25 +96,28 @@ app.post("/login", async (req, res) => {
 
 // ======= TRIP SEARCH =======
 app.get("/search", async (req, res) => {
-  const { start_date, end_date, destination, departure_city } = req.query;
-
-  if (!departure_city || !destination || !start_date || !end_date) {
+  const { to, from } = req.query;
+console.log(to);
+console.log(from);
+  if (!from || !to ) {
     return res.status(400).json({ message: "Missing trip details" });
   }
 
   try {
     const result = await pool.query(
-      `SELECT title, start_date, end_date, price 
+      `SELECT departure_city,destination, departure_date,  price ,departure_time, end_time
        FROM trips 
-       WHERE departure_city = $1 AND destination = $2`,
-      [departure_city, destination]
+       WHERE departure_city = $1 AND destination = $2 `,
+      [from, to ]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "No trips found" });
     }
-
-    res.status(200).json({ trip: result.rows });
+ console.log( result.rows );
+ return res.status(200).json(result.rows);
+    
+     
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Can't search for the trip" });

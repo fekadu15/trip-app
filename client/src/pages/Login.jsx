@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Button,
@@ -12,16 +12,50 @@ import {
   Typography,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { Email, Password } from "@mui/icons-material";
+import axios from "axios";
 
 export default function Login() {
+  const [formData , setFormData] = useState({
+   email:"",
+   Password:""
+  })
+  function handleChange(e) {
+    const {name , value , type , checked} = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox"?checked:value
+    }) )
+  }
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+     try {
+    const response = await axios.post("http://localhost:5000/login" , {
+      method:"post",
+       headers:{
+        "Content-type": "application/json"
+       } ,
+       body:JSON.stringify(formData)
+    
+    })
+    const data = await response.json();
+      console.log("Server Response:", data);
+
+     }
+     catch (err) {
+
+     }
+  }
   return (
     <>
     
     <Box
       sx={{
-        backgroundImage: "url('/bus.webp')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundImage: "url('/signup.jpg')",
+        backgroundSize: "left",
+        backgroundPosition: "left",
+         backgroundRepeat: "no-repeat",
         minHeight: "100vh",
         display: "flex",
         justifyContent: "flex-end",
@@ -52,15 +86,17 @@ export default function Login() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <Box component="form" noValidate sx={{ mt: 3 }}>
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
             <TextField
               variant="outlined"
               margin="normal"
               required
+              value={formData.email}
               fullWidth
               label="Email Address"
               autoComplete="email"
               autoFocus
+              onChange={handleChange}
             />
             <TextField
               variant="outlined"
@@ -68,8 +104,10 @@ export default function Login() {
               required
               fullWidth
               label="Password"
+              value={formData.Password}
               type="password"
               autoComplete="current-password"
+              onChange={handleChange}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
