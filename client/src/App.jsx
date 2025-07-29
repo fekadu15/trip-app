@@ -4,6 +4,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import SearchTrips from "./pages/SearchTrips"
+import NotFound from "./pages/NotFound";
 function App() {
   return (
     <BrowserRouter>
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/SearchTrips" element = { <SearchTrips />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
 <Footer />
     </BrowserRouter>

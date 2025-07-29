@@ -87,28 +87,26 @@ export default function Login() {
             Sign in
           </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3 }}>
+             <TextField
+                    name="email"
+                    label="Email Address"
+                    required
+                    fullWidth
+                    type="email"
+                    margin="normal"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
             <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              value={formData.email}
-              fullWidth
-              label="Email Address"
-              autoComplete="email"
-              autoFocus
-              onChange={handleChange}
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              label="Password"
-              value={formData.Password}
-              type="password"
-              autoComplete="current-password"
-              onChange={handleChange}
-            />
+                   name="password"
+                   label="Password"
+                   required
+                   fullWidth
+                   type="password"
+                   margin="normal"
+                   value={formData.Password}
+                   onChange={handleChange}
+                 />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"

@@ -66,20 +66,15 @@ async function handleSubmit (e) {
 }
   return (
     <>
-     <Typography  variant="h2" color="navy" gutterBottom  align="center">
-          Welcome to Trip Booking Hub ✈️
-        </Typography>
-
+  
     <Box
     
         sx={{
-          backgroundImage: "url('/login.jpg')",
-          backgroundSize: "50%",
-          backgroundPosition: "left",
-          backgroundRepeat: "no-repeat",
+          backgroundImage: "url('/bus.webp')",
+          backgroundSize: "cover",
+          backgroundPosition: "cover",
           minHeight: "100vh",
           display: "flex",
-          backgroundColor:"white",
           justifyContent: "flex-end",
           alignItems: "center",
           p: 4,
@@ -94,7 +89,7 @@ async function handleSubmit (e) {
         <Box
         
         sx={{
-            backgroundColor : "white",
+            backgroundColor : "lightGray",
             
         }}
         
@@ -138,7 +133,6 @@ async function handleSubmit (e) {
         />
       </Box>
 
-      {/* Email */}
       <TextField
         name="email"
         label="Email Address"
@@ -150,7 +144,7 @@ async function handleSubmit (e) {
         onChange={handleChange}
       />
 
-      {/* Password */}
+ 
       <TextField
         name="password"
         label="Password"

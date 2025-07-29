@@ -2,7 +2,7 @@ import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 export default function Header() {
   return (
-    <AppBar position="static" color="default">
+    <AppBar position="fixed" color="default">
       <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
         <Typography variant="h6" style={{ color: "green", fontWeight: "bold" }}>
           GUZO
