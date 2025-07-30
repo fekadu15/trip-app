@@ -22,8 +22,11 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import axios from "axios"
+import { useNavigate } from "react-router-dom";
+
 
 export default function Home() {
+     const navigate = useNavigate();
 
     const [ formData , setFormData] = useState ({
         firstName : "",
@@ -207,7 +210,10 @@ async function handleSubmit (e) {
                     How To?
                 </Typography>
                 <Grid container spacing={4} justifyContent="start" marginBottom={8} >
-                    <Grid item xs={12} sm={4}>
+
+
+                    <Button  onClick={() => navigate("/SearchTrips")}>
+                    <Grid item xs={12} sm={4}> 
                         <Card
                             style={{
                                 padding: "20px",
@@ -228,7 +234,11 @@ async function handleSubmit (e) {
                                 You can look for the trip you want using our advanced search.
                             </Typography>
                         </Card>
+                       
                     </Grid>
+                </Button>
+
+                     <Button onClick={() => navigate("/SearchTrips")}>
                     <Grid item xs={12} sm={4}>
                         <Card
                             style={{
@@ -247,8 +257,11 @@ async function handleSubmit (e) {
                             <EventAvailableIcon style={{ fontSize: 50, color: "blue" }} />
                             <Typography variant="h6">Book</Typography>
                             <Typography>Booking tickets  easier than ever.</Typography>
+                             
                         </Card>
+                        
                     </Grid>
+                    </Button>
                     <Grid item xs={12} sm={4}>
                         <Card
                             style={{

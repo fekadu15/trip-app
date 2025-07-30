@@ -18,19 +18,19 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import axios from "axios";
 import dayjs from "dayjs";
-
 import duration from "dayjs/plugin/duration";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(duration);
 dayjs.extend(customParseFormat);
 
 const SearchTrips = () => {
+
   const [searchResults, setSearchResults] = useState([]);
   const [from, setFrom] = useState("Addis Ababa");
   const [to, setTo] = useState("");
   const [date, setDate] = useState(null);
   const [passengers, setPassengers] = useState(1);
-  const [errorMessage, setErrorMessage] = useState(""); // ✅ Fixed
+  const [errorMessage, setErrorMessage] = useState("");
 
   const cities = [
     "Addis Ababa",
@@ -63,7 +63,7 @@ const SearchTrips = () => {
         setSearchResults([]);
         setErrorMessage("No trips found.");
       } else {
-        console.error("Search error:", error); // ✅ Fixed
+        console.error("Search error:", error);
         setErrorMessage("Something went wrong.");
       }
     }
@@ -76,12 +76,22 @@ const SearchTrips = () => {
     const diff = endTime.diff(startTime);
 
     const d = dayjs.duration(diff);
-    return `${d.hours()} hr ${d.minutes()} min`; // ✅ Fixed
+    return `${d.hours()} hr ${d.minutes()} min`;
   };
 
-  return (
-    <Box display="flex" justifyContent="center"  alignItems="flex-start" gap={6} minHeight="100vh" bgcolor="lightGray" p={4} mt={10}>
+  const hasSearched = searchResults.length > 0 || errorMessage;
 
+  return (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems={hasSearched ? "flex-start" : "center"}
+      gap={6}
+      minHeight="100vh"
+      bgcolor="lightGray"
+      p={4}
+      mt={hasSearched ? 10 : 0}
+    >
       <Card
         sx={{
           width: 500,
@@ -137,15 +147,25 @@ const SearchTrips = () => {
             label="Departure date"
             value={date}
             onChange={(newValue) => setDate(newValue)}
-            renderInput={(params) => <TextField fullWidth {...params} sx={{ mb: 3 }} />}
+            renderInput={(params) => (
+              <TextField fullWidth {...params} sx={{ mb: 3 }} />
+            )}
           />
         </LocalizationProvider>
 
-        <Box display="flex" justifyContent="center" alignItems="center" gap={2} mb={3}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          gap={2}
+          mb={3}
+        >
           <IconButton onClick={() => setPassengers(Math.max(1, passengers - 1))}>
             <Remove />
           </IconButton>
-          <Typography>{passengers} Passenger{passengers > 1 ? "s" : ""}</Typography>
+          <Typography>
+            {passengers} Passenger{passengers > 1 ? "s" : ""}
+          </Typography>
           <IconButton onClick={() => setPassengers(passengers + 1)}>
             <Add />
           </IconButton>
@@ -161,66 +181,89 @@ const SearchTrips = () => {
         >
           Search
         </Button>
-        {errorMessage && (
-          <Typography color="error" mt={2}>
-            {errorMessage}
-          </Typography>
-        )}
       </Card>
 
-      {searchResults.length > 0 && (
-        <Box width="100%">
-          {searchResults.map((trip, index) => (
-            <Card key={index} sx={{ mb: 3, p: 3, borderRadius: 4, boxShadow: 3 }}>
-              <Grid container alignItems="center" justifyContent="space-between">
-                {/* Departure */}
-                <Grid item xs={4}>
-                  <Typography fontWeight="bold">
-                    {dayjs(trip.departure_date).format("DD MMM").toUpperCase()}
-                  </Typography>
-                  <Typography variant="h6">{trip.departure_time}</Typography>
-                  <Typography color="text.secondary">{trip.departure_city}</Typography>
+      {hasSearched && (
+        <Box width="80%">
+          {searchResults.length > 0 ? (
+            searchResults.map((trip, index) => (
+              
+              <Card key={index} sx={{ mb: 3, p: 3, borderRadius: 4, boxShadow: 3 }}>
+                <Grid container alignItems="center" justifyContent="space-between">
+                  <Grid item xs={4}>
+                    <Typography fontWeight="bold">
+                      {dayjs(trip.departure_date).format("DD MMM").toUpperCase()}
+                    </Typography>
+                    <Typography variant="h6">{trip.departure_time}</Typography>
+                    <Typography color="text.secondary">{trip.departure_city}</Typography>
+                  </Grid>
+
+                  <Grid item xs={4} textAlign="center">
+                    <Box sx={{ width: "100%", borderTop: "2px solid #ccc", mb: 1 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      One-stop, {getDuration(trip.departure_time, trip.end_time)}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={4} textAlign="right">
+                    <Typography fontWeight="bold">
+                      {dayjs(trip.departure_date).format("DD MMM").toUpperCase()}
+                    </Typography>
+                    <Typography variant="h6">{trip.end_time}</Typography>
+                    <Typography color="text.secondary">{trip.destination}</Typography>
+                  </Grid>
                 </Grid>
 
-                {/* Duration */}
-                <Grid item xs={4} textAlign="center">
-                  <Box sx={{ width: "100%", borderTop: "2px solid #ccc", mb: 1 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    One-stop, {getDuration(trip.departure_time, trip.end_time)}
-                  </Typography>
-                </Grid>
-
-                {/* Arrival */}
-                <Grid item xs={4} textAlign="right">
-                  <Typography fontWeight="bold">
-                    {dayjs(trip.departure_date).format("DD MMM").toUpperCase()}
-                  </Typography>
-                  <Typography variant="h6">{trip.end_time}</Typography>
-                  <Typography color="text.secondary">{trip.destination}</Typography>
-                </Grid>
-              </Grid>
-
-              {/* Price */}
-              <Box display="flex" justifyContent="flex-end" mt={2}>
-                <Box
-                  sx={{
-                    backgroundColor: "#e8f5e9",
-                    px: 2,
-                    py: 1,
-                    borderRadius: 2,
-                    border: "1px solid #c8e6c9",
-                    minWidth: "100px",
-                    textAlign: "center",
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">From</Typography>
-                  <Typography color="green" fontWeight="bold">
-                    ETB {trip.price.toLocaleString()}
-                  </Typography>
+                <Box display="flex" justifyContent="flex-end" mt={2}>
+                  <Box
+                    sx={{
+                      backgroundColor: "#e8f5e9",
+                      px: 2,
+                      py: 1,
+                      borderRadius: 2,
+                      border: "1px solid #c8e6c9",
+                      minWidth: "100px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      From
+                    </Typography>
+                    <Typography color="green" fontWeight="bold">
+                      ETB {trip.price.toLocaleString()}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </Card>
-          ))}
+              </Card>
+             
+            ))
+          ) : (
+            errorMessage && (
+              <Card
+                sx={{
+                  textAlign: "center",
+                  borderRadius: 4,
+                  p: 4,
+                  boxShadow: 3,
+                  backgroundColor: "white",
+                }}
+              >
+                <img
+                  src="/notrip.jpg"
+                  alt="No trips found"
+                  style={{
+                    width: "100%",
+                    maxWidth: 400,
+                    margin: "0 auto",
+                    borderRadius: 10,
+                  }}
+                />
+                <Typography variant="h4" color="text.secondary" mt={3}>
+                Oops !  No trips found
+                </Typography>
+              </Card>
+            )
+          )}
         </Box>
       )}
     </Box>

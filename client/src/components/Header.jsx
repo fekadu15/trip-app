@@ -9,7 +9,7 @@ export default function Header() {
         </Typography>
         <div>
           <Button color="inherit" component={Link} to="/"> Home</Button>
-          <Button color="inherit" component={Link} to="/about">About Us</Button>
+          <Button color="inherit" component={Link} to="/aboutus">About Us</Button>
           <Button color="inherit" component={Link} to="/Login">LOG IN</Button>
           <Button color="inherit" component={Link} to="/SearchTrips">TRIPS</Button>
         </div>

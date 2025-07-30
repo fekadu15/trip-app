@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import SearchTrips from "./pages/SearchTrips"
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
 function App() {
   return (
     <BrowserRouter>
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/SearchTrips" element = { <SearchTrips />} />
+         <Route path="/aboutus" element = { <About />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
 <Footer />
