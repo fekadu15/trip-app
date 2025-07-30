@@ -22,8 +22,15 @@ import duration from "dayjs/plugin/duration";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(duration);
 dayjs.extend(customParseFormat);
+import { useNavigate } from "react-router-dom";
+
 
 const SearchTrips = () => {
+  const navigate = useNavigate();
+
+const handleCardClick = (tripId) => {
+  navigate(`/passenger-detail/${tripId}`);
+};
 
   const [searchResults, setSearchResults] = useState([]);
   const [from, setFrom] = useState("Addis Ababa");
@@ -188,7 +195,24 @@ const SearchTrips = () => {
           {searchResults.length > 0 ? (
             searchResults.map((trip, index) => (
               
-              <Card key={index} sx={{ mb: 3, p: 3, borderRadius: 4, boxShadow: 3 }}>
+           <Card
+  key={index}
+  onClick={() => handleCardClick(trip.id)}
+  sx={{
+    mb: 3,
+    p: 3,
+    borderRadius: 4,
+    boxShadow: 3,
+    cursor: "pointer",
+    transition: "0.2s",
+    "&:hover": {
+      boxShadow: 6,
+      transform: "scale(1.01)",
+    },
+  }}
+>
+
+                
                 <Grid container alignItems="center" justifyContent="space-between">
                   <Grid item xs={4}>
                     <Typography fontWeight="bold">

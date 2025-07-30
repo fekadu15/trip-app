@@ -31,9 +31,10 @@ app.get("/", (req, res) => {
 
 // ======= SIGNUP =======
 app.post("/signup", async (req, res) => {
-  const { Password, Confirm, firstName, lastName, email } = req.body;
+  const { password, confirm, firstName, lastName, email } = req.body;
 
-  if (!email || !email.includes("@") || !firstName?.trim()  || !lastName?.trim() || Password.length < 6) {
+
+  if (!email || !email.includes("@") || !firstName?.trim()  || !lastName?.trim() || password.length < 6) {
     return res.status(400).json({ message: "Invalid email, name, or password" });
   }
 
@@ -105,7 +106,7 @@ console.log(from);
 
   try {
     const result = await pool.query(
-      `SELECT departure_city,destination, departure_date,  price ,departure_time, end_time
+      `SELECT id , departure_city,destination, departure_date,  price ,departure_time, end_time
        FROM trips 
        WHERE departure_city = $1 AND destination = $2 `,
       [from, to ]
@@ -123,6 +124,23 @@ console.log(from);
     res.status(500).json({ error: "Can't search for the trip" });
   }
 });
+
+app.get("/trips/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query("SELECT * FROM trips WHERE id = $1", [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error fetching trip by ID:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 // ======= BOOK TRIP =======
 const verifyToken = require("./middleware/verifyToken");

@@ -23,7 +23,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import axios from "axios"
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-toastify";
 
 export default function Home() {
      const navigate = useNavigate();
@@ -45,28 +45,28 @@ export default function Home() {
         }));
       }
       
-async function handleSubmit (e) {
-     e.preventDefault();
-     try {
-
-   
-     const response = await axios.post ("http://localhost:5000/signup",{
-       method:"post",
-       headers:{
-        "Content-type": "application/json"
-       } ,
-       body:JSON.stringify(formData)
+async function handleSubmit(e) {
+  e.preventDefault();
+  try {
+    const response = await axios.post("http://localhost:5000/signup", formData);
+    console.log("Server Response:", response.data);
+    // maybe navigate or show a success message
     
-     })
-     const data = await response.json();
-      console.log("Server Response:", data);
-
-     
-    }
-    catch (err) {
-        console.log(err);
-    }
+ toast.success("Registered! Redirecting to login...");
+setTimeout(() => navigate("/login"), 3000);
+   setFormData({
+  firstName: "",
+  lastName: "",
+  password: "",
+  confirm: "",
+  email: "",
+  agreeToEmails: false
+});
+  } catch (err) {
+    console.error("Signup failed:", err);
+  }
 }
+
   return (
     <>
   
