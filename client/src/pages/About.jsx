@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 
 
 const About = () => {
+
     const navigate = useNavigate();
+    
   return (
     <Container maxWidth="md" sx={{ mt: 6, mb: 6 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>

@@ -145,21 +145,21 @@ app.get("/trips/:id", async (req, res) => {
 // ======= BOOK TRIP =======
 const verifyToken = require("./middleware/verifyToken");
 
-app.post("/book_trips", verifyToken, async (req, res) => {
-  const { trip_id } = req.body;
+app.post("/book",  async (req, res) => {
+  const { trip_id ,email,first_name,last_name} = req.body;
 
   if (!trip_id) {
     return res.status(400).json({ message: "Trip ID is required" });
   }
-console.log("USER ID:", req.userId);
+
 console.log("TRIP ID:", trip_id);
 
   try {
     const result = await pool.query(
-      `INSERT INTO user_trip (user_id, trip_id)
-       VALUES ($1, $2)
+      `INSERT INTO user_trip (f_name,l_name,email, trip_id)
+       VALUES ($1, $2, $3,$4)
        RETURNING *`,
-      [req.userId, trip_id]
+      [first_name,last_name,email, trip_id]
     );
 
     res.status(201).json({

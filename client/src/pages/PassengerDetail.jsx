@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import dayjs from "dayjs";
-
+import { toast } from "react-toastify";
 const PassengerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ const PassengerDetail = () => {
         email,
       });
 
-      alert("Booking confirmed!");
+     toast.success("Booking confirmed...");
       navigate("/"); // or to a 'booking success' page
     } catch (error) {
       console.error("Booking failed:", error);
