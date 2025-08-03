@@ -68,7 +68,7 @@ app.post("/login", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
     if (result.rows.length === 0) {
-      return res.status(400).json({ message: "Unknown email" });
+      return res.status(400).json({ message: "you need to sign up first !" });
     }
 
     const user = result.rows[0];
@@ -89,6 +89,8 @@ app.post("/login", async (req, res) => {
       message: "Login successful",
       token: token,
     });
+    
+    
   } catch (err) {
     console.log(err);
     res.status(500).send("Internal server error");
@@ -98,8 +100,7 @@ app.post("/login", async (req, res) => {
 // ======= TRIP SEARCH =======
 app.get("/search", async (req, res) => {
   const { to, from } = req.query;
-console.log(to);
-console.log(from);
+
   if (!from || !to ) {
     return res.status(400).json({ message: "Missing trip details" });
   }
@@ -174,10 +175,9 @@ console.log("TRIP ID:", trip_id);
 const upload = require("./middleware/upload"); 
 
 app.post("/trips", verifyToken, upload.single("image"), async (req, res) => {
-  const { start_date, end_date, destination, departure_city, title , price} = req.body;
+  const {departure_date, end_time, destination, departure_city, departure_time , price} = req.body;
 
-  // Check for required fields
-  if (!start_date || !end_date || !destination || !departure_city || !title || !price|| !req.file) {
+  if (!departure_date || !end_time || !destination || !departure_city || !departure_time  || !price|| !req.file) {
     return res.status(400).json({ message: "All fields including image must be provided" });
   }
 
@@ -190,10 +190,10 @@ app.post("/trips", verifyToken, upload.single("image"), async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO trips (start_date, end_date, destination, departure_city, title, image_path,price)
+      `INSERT INTO trips (departure_date, end_time, destination, departure_city,departure_time, image_path,price)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [start_date, end_date, destination, departure_city, title, image_path, price]
+      [departure_date, end_time, destination, departure_city, title, image_path, price]
     );
 
     res.status(201).json({
