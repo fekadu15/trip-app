@@ -8,7 +8,7 @@ const About = () => {
     const navigate = useNavigate();
     
   return (
-    <Container maxWidth="md" sx={{ mt: 6, mb: 6 }}>
+    <Container maxWidth="md" sx={{ mt: 16, mb: 16 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
         <Typography variant="h4" gutterBottom>
           🧭 About Us

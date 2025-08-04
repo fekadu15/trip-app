@@ -6,7 +6,9 @@ const port = 5000;
 const { Pool } = require("pg");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-
+const sendConfirmationEmail = require("./emailService");
+const verifyToken = require("./middleware/verifyToken");
+const upload = require("./middleware/upload"); 
 
 const corsOption = {
   origin: ["http://localhost:5173"],
@@ -143,9 +145,6 @@ app.get("/trips/:id", async (req, res) => {
 });
 
 
-// ======= BOOK TRIP =======
-const verifyToken = require("./middleware/verifyToken");
-
 app.post("/book",  async (req, res) => {
   const { trip_id ,email,first_name,last_name} = req.body;
 
@@ -153,16 +152,22 @@ app.post("/book",  async (req, res) => {
     return res.status(400).json({ message: "Trip ID is required" });
   }
 
-console.log("TRIP ID:", trip_id);
-
   try {
+     
     const result = await pool.query(
       `INSERT INTO user_trip (f_name,l_name,email, trip_id)
        VALUES ($1, $2, $3,$4)
        RETURNING *`,
       [first_name,last_name,email, trip_id]
     );
-
+    if (result.rows.length !== 0) {
+      const fetchtrip = await pool.query(
+        "select departure_city,destination,departure_date from trips where id = $1",
+        [trip_id]);
+      const trip = fetchtrip.rows[0];
+ await sendConfirmationEmail(email, first_name, trip);
+    }
+  
     res.status(201).json({
       message: "Trip booked successfully",
       booking: result.rows[0],
@@ -172,7 +177,7 @@ console.log("TRIP ID:", trip_id);
     res.status(500).json({ message: "Failed to book trip" });
   }
 });
-const upload = require("./middleware/upload"); 
+
 
 app.post("/trips", verifyToken, upload.single("image"), async (req, res) => {
   const {departure_date, end_time, destination, departure_city, departure_time , price} = req.body;
@@ -186,14 +191,13 @@ app.post("/trips", verifyToken, upload.single("image"), async (req, res) => {
     return res.status(403).json({ message: "Access denied. Admins only." });
   }
 
-  const image_path = req.file.filename; // or use req.file.path if you prefer full path
-
+  const image_path = req.file.filename; 
   try {
     const result = await pool.query(
       `INSERT INTO trips (departure_date, end_time, destination, departure_city,departure_time, image_path,price)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [departure_date, end_time, destination, departure_city, title, image_path, price]
+      [departure_date, end_time, destination, departure_city, departure_time, image_path, price]
     );
 
     res.status(201).json({

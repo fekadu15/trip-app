@@ -47,6 +47,8 @@ const handleCardClick = (tripId) => {
     "Dire Dawa",
     "Arba Minch",
     "Jimma",
+    "Wolyta",
+    "Debre Makos"
   ];
 
   const isSearchDisabled = !from || !to || !date;

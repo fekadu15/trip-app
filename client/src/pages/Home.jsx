@@ -80,8 +80,8 @@ setTimeout(() => navigate("/login"), 3000);
           display: "flex",
           justifyContent: "flex-end",
           alignItems: "center",
-          p: 4,
-          pr: 20,
+          p:20,
+          
         }}
         
         

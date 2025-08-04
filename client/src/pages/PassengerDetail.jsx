@@ -11,6 +11,8 @@ import {
 import axios from "axios";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
+
+
 const PassengerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -46,7 +48,7 @@ const PassengerDetail = () => {
       });
 
      toast.success("Booking confirmed...");
-      navigate("/"); // or to a 'booking success' page
+      navigate("/Dashboard"); // or to a 'booking success' page
     } catch (error) {
       console.error("Booking failed:", error);
       alert("Something went wrong. Please try again.");

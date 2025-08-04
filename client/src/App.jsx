@@ -12,7 +12,7 @@ import PostTrip from "./pages/PostTrip";
 import PrivateRoute from "./components/PrivateRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import Dashboard from "./pages/Dashboard";
 function App() {
   // Manage logged in state here
   const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem("token"));
@@ -30,7 +30,7 @@ function App() {
         <Route path="/aboutus" element={<About />} />
         <Route path="*" element={<NotFound />} />
         <Route path="/passenger-detail/:id" element={<PassengerDetail />} />
-
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route
           path="/post-trip"
           element={

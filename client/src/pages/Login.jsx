@@ -47,11 +47,11 @@ const [showError, setShowError] = useState(false);
       if (token) {
         localStorage.setItem("token", token);  
         console.log (message,"token saved");
-           setFormData({
+    setFormData({
       email:"",
       password:""
      });
-        navigate("/");  
+        navigate("/Dashboard");  
       } else {
         console.error("No token received from server");
       }
