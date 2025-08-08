@@ -1,16 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   Box,
   Grid,
   Card,
   Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   TextField,
   IconButton,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { LocationOn, Add, Remove } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -24,58 +21,36 @@ dayjs.extend(duration);
 dayjs.extend(customParseFormat);
 import { useNavigate } from "react-router-dom";
 
-
 const SearchTrips = () => {
   const navigate = useNavigate();
 
-const handleCardClick = (tripId) => {
-  navigate(`/passenger-detail/${tripId}`);
-};
-
   const [searchResults, setSearchResults] = useState([]);
-  const [from, setFrom] = useState("Addis Ababa");
+  const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState(null);
   const [passengers, setPassengers] = useState(1);
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const cities = [
-    "Addis Ababa",
-    "Gondar",
-    "Bahir Dar",
-    "Hawassa",
-    "Dire Dawa",
-    "Arba Minch",
-    "Jimma",
-    "Wolyta",
-    "Debre Makos"
-  ];
+  const debounceRef = useRef(null);
 
   const isSearchDisabled = !from || !to || !date;
 
-  const handleSubmit = async () => {
-    try {
-      const formattedDate = date ? dayjs(date).format("YYYY-MM-DD") : "";
+  const escapeRegExp = (s) =>
+    s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // for regex-safe
 
-      const res = await axios.get("http://localhost:5000/search", {
-        params: {
-          from,
-          to,
-          date: formattedDate,
-        },
-      });
-
-      setSearchResults(res.data);
-      setErrorMessage("");
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        setSearchResults([]);
-        setErrorMessage("No trips found.");
-      } else {
-        console.error("Search error:", error);
-        setErrorMessage("Something went wrong.");
-      }
-    }
+  const highlightMatch = (text, query) => {
+    if (!query || !text) return text;
+    const parts = text.split(new RegExp(`(${escapeRegExp(query)})`, "gi"));
+    return parts.map((part, i) =>
+      part.toLowerCase() === query.toLowerCase() ? (
+        <strong key={i} style={{ background: "rgba(255,230,150,0.6)" }}>
+          {part}
+        </strong>
+      ) : (
+        <span key={i}>{part}</span>
+      )
+    );
   };
 
   const getDuration = (start, end) => {
@@ -83,9 +58,59 @@ const handleCardClick = (tripId) => {
     const startTime = dayjs(start, format);
     const endTime = dayjs(end, format);
     const diff = endTime.diff(startTime);
-
     const d = dayjs.duration(diff);
     return `${d.hours()} hr ${d.minutes()} min`;
+  };
+
+  const handleCardClick = (tripId) => {
+    navigate(`/passenger-detail/${tripId}`);
+  };
+
+  const performSearch = useCallback(async () => {
+    if (isSearchDisabled) return;
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const formattedDate = date ? dayjs(date).format("YYYY-MM-DD") : "";
+      const res = await axios.get("http://localhost:5000/search", {
+        params: {
+          from,
+          to,
+          date: formattedDate,
+        },
+        
+      });
+
+      setSearchResults(res.data || []);
+      if (!res.data || res.data.length === 0) {
+        setErrorMessage("No trips found.");
+      } else {
+        setErrorMessage("");
+      }
+      setFrom("");
+      setDate("")
+      setTo("")
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        setSearchResults([]);
+        setErrorMessage("No trips found.");
+      } else {
+        console.error("Search error:", error);
+        setSearchResults([]);
+        setErrorMessage("Something went wrong. Try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [from, to, date, isSearchDisabled]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // prevent page reload on form submit
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    await performSearch();
   };
 
   const hasSearched = searchResults.length > 0 || errorMessage;
@@ -115,117 +140,127 @@ const handleCardClick = (tripId) => {
           Search
         </Typography>
 
-        <Box display="flex" gap={2} mb={3}>
-          <FormControl fullWidth>
-            <InputLabel id="from-label">Leaving from</InputLabel>
-            <Select
-              labelId="from-label"
+        <form onSubmit={handleSubmit}>
+          <Box display="flex" gap={2} mb={3}>
+            <TextField
+              label="Leaving from"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              label="Leaving from"
-              startAdornment={<LocationOn color="error" />}
-            >
-              {cities.map((city) => (
-                <MenuItem key={city} value={city}>
-                  {city}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              fullWidth
+              autoComplete="off"
+            />
 
-          <FormControl fullWidth>
-            <InputLabel id="to-label">Destination</InputLabel>
-            <Select
-              labelId="to-label"
+            <TextField
+              label="Destination"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              label="Destination"
-              startAdornment={<LocationOn color="error" />}
+              fullWidth
+              autoComplete="off"
+            />
+          </Box>
+
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              label="Departure date"
+              value={date}
+              onChange={(newValue) => setDate(newValue)}
+              renderInput={(params) => (
+                <TextField fullWidth {...params} sx={{ mb: 3 }} />
+              )}
+            />
+          </LocalizationProvider>
+
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            gap={2}
+            mb={3}
+          >
+            <IconButton
+              onClick={() => setPassengers(Math.max(1, passengers - 1))}
             >
-              {cities.map((city) => (
-                <MenuItem key={city} value={city}>
-                  {city}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
+              <Remove />
+            </IconButton>
+            <Typography>
+              {passengers} Passenger{passengers > 1 ? "s" : ""}
+            </Typography>
+            <IconButton onClick={() => setPassengers(passengers + 1)}>
+              <Add />
+            </IconButton>
+          </Box>
 
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DatePicker
-            label="Departure date"
-            value={date}
-            onChange={(newValue) => setDate(newValue)}
-            renderInput={(params) => (
-              <TextField fullWidth {...params} sx={{ mb: 3 }} />
-            )}
-          />
-        </LocalizationProvider>
-
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          gap={2}
-          mb={3}
-        >
-          <IconButton onClick={() => setPassengers(Math.max(1, passengers - 1))}>
-            <Remove />
-          </IconButton>
-          <Typography>
-            {passengers} Passenger{passengers > 1 ? "s" : ""}
-          </Typography>
-          <IconButton onClick={() => setPassengers(passengers + 1)}>
-            <Add />
-          </IconButton>
-        </Box>
-
-        <Button
-          variant="contained"
-          fullWidth
-          size="large"
-          sx={{ borderRadius: 10, textTransform: "none", fontWeight: "bold" }}
-          disabled={isSearchDisabled}
-          onClick={handleSubmit}
-        >
-          Search
-        </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            size="large"
+            sx={{ borderRadius: 10, textTransform: "none", fontWeight: "bold" }}
+            disabled={isSearchDisabled}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : "Search"}
+          </Button>
+        </form>
       </Card>
 
       {hasSearched && (
-        <Box width="80%">
+        <Box width="80%" position="relative">
+          {loading && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 10,
+                right: 10,
+                zIndex: 10,
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <CircularProgress size={20} />
+              <Typography variant="body2">Searching...</Typography>
+            </Box>
+          )}
+
           {searchResults.length > 0 ? (
             searchResults.map((trip, index) => (
-              
-           <Card
-  key={index}
-  onClick={() => handleCardClick(trip.id)}
-  sx={{
-    mb: 3,
-    p: 3,
-    borderRadius: 4,
-    boxShadow: 3,
-    cursor: "pointer",
-    transition: "0.2s",
-    "&:hover": {
-      boxShadow: 6,
-      transform: "scale(1.01)",
-    },
-  }}
->
-
-                
-                <Grid container alignItems="center" justifyContent="space-between">
+              <Card
+                key={index}
+                onClick={() => handleCardClick(trip.id)}
+                sx={{
+                  mb: 3,
+                  p: 3,
+                  borderRadius: 4,
+                  boxShadow: 3,
+                  cursor: "pointer",
+                  transition: "0.2s",
+                  "&:hover": {
+                    boxShadow: 6,
+                    transform: "scale(1.01)",
+                  },
+                }}
+              >
+                <Grid
+                  container
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
                   <Grid item xs={4}>
                     <Typography fontWeight="bold">
-                      {dayjs(trip.departure_date).format("DD MMM").toUpperCase()}
+                      {dayjs(trip.departure_date)
+                        .format("DD MMM")
+                        .toUpperCase()}
                     </Typography>
                     <Typography variant="h6">{trip.departure_time}</Typography>
-                    <Typography color="text.secondary">{trip.departure_city}</Typography>
+                    <Typography color="text.secondary">
+                      {highlightMatch(trip.departure_city, from)}
+                    </Typography>
                   </Grid>
 
                   <Grid item xs={4} textAlign="center">
-                    <Box sx={{ width: "100%", borderTop: "2px solid #ccc", mb: 1 }} />
+                    <Box
+                      sx={{ width: "100%", borderTop: "2px solid #ccc", mb: 1 }}
+                    />
                     <Typography variant="body2" color="text.secondary">
                       One-stop, {getDuration(trip.departure_time, trip.end_time)}
                     </Typography>
@@ -233,10 +268,14 @@ const handleCardClick = (tripId) => {
 
                   <Grid item xs={4} textAlign="right">
                     <Typography fontWeight="bold">
-                      {dayjs(trip.departure_date).format("DD MMM").toUpperCase()}
+                      {dayjs(trip.departure_date)
+                        .format("DD MMM")
+                        .toUpperCase()}
                     </Typography>
                     <Typography variant="h6">{trip.end_time}</Typography>
-                    <Typography color="text.secondary">{trip.destination}</Typography>
+                    <Typography color="text.secondary">
+                      {highlightMatch(trip.destination, to)}
+                    </Typography>
                   </Grid>
                 </Grid>
 
@@ -256,12 +295,11 @@ const handleCardClick = (tripId) => {
                       From
                     </Typography>
                     <Typography color="green" fontWeight="bold">
-                      ETB {trip.price.toLocaleString()}
+                      ETB {trip.price?.toLocaleString?.() ?? trip.price}
                     </Typography>
                   </Box>
                 </Box>
               </Card>
-             
             ))
           ) : (
             errorMessage && (
@@ -285,8 +323,23 @@ const handleCardClick = (tripId) => {
                   }}
                 />
                 <Typography variant="h4" color="text.secondary" mt={3}>
-                Oops !  No trips found
+                  Oops! No trips found
                 </Typography>
+                <Typography sx={{ mt: 1 }}>
+                  Try a different date, destination, or broaden your search.
+                </Typography>
+                <Box sx={{ mt: 3 }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      setTo("");
+                      setSearchResults([]);
+                      setErrorMessage("");
+                    }}
+                  >
+                    Try again
+                  </Button>
+                </Box>
               </Card>
             )
           )}

@@ -33,7 +33,7 @@ const Footer = () => {
               (text, idx) => (
                 <Typography key={idx} variant="body2" sx={{ my: 0.5 }}>
                   <Link
-                    href="#"
+                    href="/aboutus"
                     underline="hover"
                     color="inherit"
                     sx={{
